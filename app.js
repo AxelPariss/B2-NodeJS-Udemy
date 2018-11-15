@@ -6,6 +6,7 @@
 const program = require('commander')
 const inquirer = require('inquirer')
 const { getCourse, getCourses, getReviews } = require('./Udemy')
+const { writeLog } = require('./Log')
 
 // Constantes
 const { UDEMY_BASE_URL } = require('./config')
@@ -29,12 +30,18 @@ if (program.search){
         console.log('Vous devez renseigner une recherche ou un mot clé')
         return
     }
-    console.log("Recherche en cours...")
+    writeLog(`Recherche en cours : "${search}"`)
 
     // Récupère les cours selon la recherche
     getCourses(search)
         .then((courses) => {
+            writeLog(`Recherche réussi : "${search}"`)
+            if(courses.length == 0) {
+                console.log('Aucun résultat pour votre recherche :/')
+                return
+            }
             let course_list = courses.map(course => course.title)
+
             inquirer
                 .prompt([
                     {
@@ -50,6 +57,7 @@ if (program.search){
                         if (answer.title == course.title){
                             getCourse(course.id)
                                 .then(course => {
+                                    writeLog(`Affichage des détails : "${course.title}"`)
                                     console.log('------------------------------------')
                                     console.log('--------------- COURS --------------')
                                     console.log('------------------------------------')
@@ -60,15 +68,16 @@ if (program.search){
                                     return getReviews(course.id)
                                 })
                                 .then(reviews => {
+                                    writeLog(`Affichage des reviews : "${course.title}"`)
                                     console.log('------------------------------------')
                                     console.log('---------------- AVIS --------------')
                                     console.log('------------------------------------')
                                     reviews.forEach(review => console.log('Note'+review.rating+'/5 - Avis: '+review.content))
                                 })
-                                .catch(err => console.log())
+                                .catch(err => writeLog(`Erreur dans l'achiffage des détails : "${course.title}"`))
                         }
                     })
                 });
         })
-        .catch(err => console.log(err))
+        .catch(err => writeLog(`Recherche échouée : "${search}"`))
 }
