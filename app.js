@@ -17,7 +17,6 @@ const { UDEMY_BASE_URL } = require('./config')
 program
     .version('0.1.0')
     .option('-s, --search [search]', 'Rechercher des cours sur Udemy (ex: python, developpement, ...)')
-    .option('-c, --courses', 'Liste les cours créés par Axel')
     .parse(process.argv)
 
 
